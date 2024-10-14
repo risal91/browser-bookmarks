@@ -11,39 +11,226 @@ const utils = require('../utils');
  * @param {String} profile - The profile name (default: "Default")
  * @return {String} - The directory to the Google Chrome profile
  */
-const getDirectory = (platform, profile = 'Default') => {
+const getDirectoryChrome = (platform) => {
+  return getProfileChrome(platform)
+};
+const getDirectoryEdge = (platform) => {
+  return getProfileEdge(platform)
+};
+const getDirectoryOpera = (platform) => {
+  return getProfileOpera(platform)
+};
+const getDirectoryOperaGX = (platform) => {
+  return getProfileOperaGX(platform)
+};
+const getDirectoryVivaldi = (platform) => {
+  return getProfileVivaldi(platform)
+};
+const getDirectoryBrave = (platform) => {
+  return getProfileBrave(platform)
+};
+
+function getProfileChrome(platform){
+  let targetPath;
   switch (platform) {
     case 'darwin':
-      return path.join(
+      targetPath = path.join(
         os.homedir(),
         'Library',
         'Application Support',
         'Google',
         'Chrome',
-        profile,
-        'Bookmarks'
       );
+      break;
     case 'win32':
-      return path.join(
+      targetPath = path.join(
         process.env.LOCALAPPDATA,
         'Google',
         'Chrome',
         'User Data',
-        profile,
-        'Bookmarks'
       );
+      break;
     case 'linux':
-      return path.join(
+      targetPath = path.join(
         os.homedir(),
         '.config',
         'google-chrome',
-        profile,
-        'Bookmarks'
       );
-    default:
-      return '';
-  }
-};
+      break;
+    }
+  return findFolders(targetPath)
+}
+function getProfileEdge(platform){
+  let targetPath;
+  switch (platform) {
+    case 'darwin':
+      targetPath = path.join(
+        os.homedir(),
+        'Library',
+        'Application Support',
+        'Microsoft Edge',
+      );
+      break;
+    case 'win32':
+      targetPath = path.join(
+        process.env.LOCALAPPDATA,
+        'Microsoft',
+        'Edge',
+        'User Data',
+      );
+      break;
+    case 'linux':
+      targetPath = path.join(
+        os.homedir(),
+        '.config',
+        'microsoft-edge',
+      );
+      break;
+    }
+  return findFolders(targetPath)
+}
+function getProfileOpera(platform){
+  let targetPath;
+  switch (platform) {
+    case 'darwin':
+      targetPath = path.join(
+        os.homedir(),
+        'Library',
+        'Application Support',
+        'com.operasoftware.Opera',
+      );
+      break;
+    case 'win32':
+      targetPath = path.join(
+        process.env.APPDATA,
+        'Opera Software',
+        'Opera Stable',
+      );
+      break;
+    case 'linux':
+      targetPath = path.join(
+        os.homedir(),
+        '.config',
+        'opera',
+      );
+      break;
+    }
+  return findFolders(targetPath)
+}
+function getProfileOperaGX(platform){
+  let targetPath;
+  switch (platform) {
+    case 'darwin':
+      targetPath = path.join(
+        os.homedir(),
+        'Library',
+        'Application Support',
+        'com.operasoftware.Opera',
+      );
+      break;
+    case 'win32':
+      targetPath = path.join(
+        process.env.APPDATA,
+        'Opera Software',
+        'Opera GX Stable',
+      );
+      break;
+    case 'linux':
+      targetPath = path.join(
+        os.homedir(),
+        '.config',
+        'opera',
+      );
+      break;
+    }
+  return findFolders(targetPath)
+}
+function getProfileVivaldi(platform){
+  let targetPath;
+  switch (platform) {
+    case 'darwin':
+      targetPath = path.join(
+        os.homedir(),
+        'Library',
+        'Application Support',
+        'vivaldi',
+      );
+      break;
+    case 'win32':
+      targetPath = path.join(
+        process.env.LOCALAPPDATA,
+        'Vivaldi',
+        'User Data',
+      );
+      break;
+    case 'linux':
+      targetPath = path.join(
+        os.homedir(),
+        '.config',
+        'vivaldi',
+      );
+      break;
+    }
+  return findFolders(targetPath)
+}
+function getProfileBrave(platform){
+  let targetPath;
+  switch (platform) {
+    case 'darwin':
+      targetPath = path.join(
+        os.homedir(),
+        'Library',
+        'Application Support',
+        'BraveSoftware',
+        'Brave-Browser',
+
+      );
+      break;
+    case 'win32':
+      targetPath = path.join(
+        process.env.LOCALAPPDATA,
+        'BraveSoftware',
+        'Brave-Browser',
+        'User Data',
+      );
+      break;
+    case 'linux':
+      targetPath = path.join(
+        os.homedir(),
+        '.config',
+        'BraveSoftware',
+        'Brave-Browser'
+      );
+      break;
+    }
+  return findFolders(targetPath)
+}
+
+
+function findFolders(directory){
+  let results = [];
+  let list = fs.readdirSync(directory)
+
+  list.forEach(file => {
+    const fullPath = path.join(directory, file);
+    const stats = fs.statSync(fullPath)
+
+    if(stats.isDirectory()){
+      if(file.includes('Default') ||  file.includes('Profile')){
+        const bookmarkPath = path.join(fullPath, 'Bookmarks');
+        results.push(bookmarkPath);
+      } else if (file === 'Bookmarks') {
+        results.push(fullPath);
+      }
+    }
+  })
+  let i = 0
+  results.forEach(element => {
+    i++
+    console.log(i +":"+ element)
+  });
+  return results;
+}
 
 /**
  * Normalizes the Chrome bookmark item to our bookmark model.
@@ -127,7 +314,12 @@ const extractBookmarks = file => new Promise((resolve) => {
 });
 
 module.exports = {
-  getDirectory,
+  getDirectoryChrome,
+  getDirectoryEdge,
+  getDirectoryBrave,
+  getDirectoryOpera,
+  getDirectoryOperaGX,
+  getDirectoryVivaldi,
   getChildren,
   extractBookmarks,
   normalize,
