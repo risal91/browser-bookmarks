@@ -206,23 +206,27 @@ function getProfileBrave(platform){
   return findFolders(targetPath)
 }
 
-
+function filterList(list){
+  return list.filter(item => item.includes("Default") || item.includes("Bookmarks") || item.includes("Profile"));
+};
 function findFolders(directory){
   let results = [];
   let list = fs.readdirSync(directory)
+    list = filterList(list);
+    console.log(list);
 
   list.forEach(file => {
     const fullPath = path.join(directory, file);
     const stats = fs.statSync(fullPath)
 
-    if(stats.isDirectory()){
+    //if(stats.isDirectory()){
       if(file.includes('Default') ||  file.includes('Profile')){
         const bookmarkPath = path.join(fullPath, 'Bookmarks');
         results.push(bookmarkPath);
       } else if (file === 'Bookmarks') {
         results.push(fullPath);
       }
-    }
+    //}
   })
   let i = 0
   results.forEach(element => {
